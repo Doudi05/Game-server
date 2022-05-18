@@ -8,6 +8,7 @@ int send_string(int fd, const char *str){
     int nb=strlen(str)+1;
     write(fd,&nb,sizeof(int));
     write(fd,str,nb);
+    return 0;
 }
 
 /*
@@ -38,6 +39,7 @@ int send_argv(int fd, char* argv[]){
     for(int i=1;i<=nb;i++){
         send_string(fd,argv[i]);
     }
+    return 0;
 }
 
 /*
@@ -45,7 +47,7 @@ recv_argv reçoit la taille d'un tableau et chaque string qu'il contient via le 
 */
 char **recv_argv(int fd){
     int nb;
-    char* r;
+    //char* r;
     read(fd,&nb,sizeof(int));
     recv_a=(char**)calloc(nb+1,sizeof(char*));
     for(int i=0;i<nb;i++){
