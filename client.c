@@ -47,6 +47,7 @@ int main(int argc, char const *argv[])
 
 
 	pid_t serv_pid = read_pid();
+	printf("%d\n", serv_pid);
 	pid_t cli_pid = getpid();
 	char *spid = malloc(6);
 	sprintf(spid, "%d", cli_pid);
@@ -69,20 +70,21 @@ int main(int argc, char const *argv[])
 		strcat(args[i], argv[i]);
 	}
 
-	printf("aaaa\n");
-
+	
 	kill(serv_pid, SIGUSR1);
+	printf("caca\n");
 	int fd = open("/tmp/game_server.fifo", O_WRONLY);
-	send_argv(fd, args);
-	close(fd);
-
 	printf("aaaa\n");
+	send_argv(fd, args);
+	
+
+	close(fd);
 
 	sigset_t usr1;
 	sigemptyset(&usr1);
 	sigaddset(&usr1, SIGUSR1);
 	printf("aaaaa\n");
-	while(1){
+	while(0){
 		sigprocmask(SIG_BLOCK, &usr1, NULL);
 		if(usr1_receive){
 			printf("usr1 reçu, continuité du programme");
@@ -96,6 +98,9 @@ int main(int argc, char const *argv[])
 	return 0;
 }
 
+/**
+* cette fonction va lire le pid du programme server present dans le fichier game_server.pid s'il existe
+*/
 pid_t read_pid(){
 	pid_t pid;
 
@@ -108,7 +113,15 @@ pid_t read_pid(){
 	char buf[10];
 
 	fread(buf, sizeof(int), 10, f);
+	int i = 0;
+	while(!feof(f)){
+		printf("aaaaaaa : %c", buf[i]);
+		i++;
+	}
+
 	pid = atoi(buf);
+
+	fclose(f);
 
 	return pid;
 }

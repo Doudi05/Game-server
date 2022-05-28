@@ -28,33 +28,33 @@ char *recv_string(int fd){
 /*
 send_argv envoie la longueur d'un tableau et chaque string qu'il contient via le descripteur de fichier fd;
 */
-int send_argv(int fd, char* argv[]){
-    int nb=0;
-    while(1){ //TODO
-        if(argv[nb]==NULL){
-            break;
-        }
-        nb++;
-    }
-    nb=nb-1;
-    write(fd,&nb,sizeof(int));
-    for(int i=1;i<=nb;i++){
-        send_string(fd,argv[i]);
-    }
+int send_argv(int fd, char *argv[]){
+  ssize_t len = 0;
+  while(argv[len]!=NULL){
+    len++;
+  }
 
-    return 0;
+  write(fd,&len,sizeof(ssize_t));
+  for (size_t i = 0; i<len;i++){
+    send_string(fd,argv[i]);
+  }
+  return 0;
 }
 
 /*
 recv_argv reçoit la taille d'un tableau et chaque string qu'il contient via le descripteur de fichier fd;
 */
 char **recv_argv(int fd){
-    int nb;
-    //char* r;
-    read(fd,&nb,sizeof(int));
-    recv_a=(char**)calloc(nb+1,sizeof(char*));
-    for(int i=0;i<nb;i++){
-        recv_a[i]=recv_string(fd);
-    }
-    return recv_a;
+  size_t len;
+  read(fd,&len,sizeof(ssize_t));
+
+  char **tab=calloc(len+1,sizeof(char*));
+
+  for(size_t i = 0; i<len;i++){
+    tab[i]=recv_string(fd);
+  }
+
+  tab[len]=NULL;
+  return tab;
+
 }

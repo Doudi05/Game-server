@@ -32,19 +32,23 @@ int main(int argc, char const *argv[])
 
 		//creation du tube nommé s'il n'existe pas
 		if(stat("/tmp/game_server.fifo", &file_stat) != 0){
-			mkfifo("/tmp/game_server.fifo", 0644);
+			mkfifo("/tmp/game_server.fifo", 0664);
 			printf("[OK] : Tube nommé.\n");
 		}
 
 		//creation du repertoire game_server s'il n'existe pas.
 		if(stat("/tmp/game_server.", &file_stat) != 0){
-			mkdir("/tmp/game_server.", 0644);
+			mkdir("/tmp/game_server.", 0664);
 			printf("[OK] : Repertoire server.\n");
 		}
 		
 		//on ecrit le pid du processus dans le fichier créé
-		fprintf(f, "%d", pid);
+		char *spid = malloc(6);
+		sprintf(spid, "%d", pid);
+		printf("%s", spid);
+		fwrite(spid, sizeof(char), 10, f);
 		printf("[OK] : Server.\n");
+		fclose(f);
 
 		/* handler du signal SIGUSR1 */
 		void handSIGUSR1(int sig) {
@@ -57,8 +61,8 @@ int main(int argc, char const *argv[])
 				printf("signal reçu\n");
 				int fd = open("/tmp/game_server.fifo", O_RDONLY);
 				char **read = recv_argv(fd);
+				
 				close(fd);
-
 				//on stocke le pid du client, le nom du jeu ainsi que les potentiels arguments
 				pid_t cli_pid = atoi(read[0]);
 
@@ -116,7 +120,7 @@ int main(int argc, char const *argv[])
 				usr1_receive = 0;
 			}
 			else{
-				printf("attente de signal\n");
+				printf("%d\n", getpid());
 			}
 		}
 
