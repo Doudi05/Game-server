@@ -48,7 +48,12 @@ int main(int argc, char const *argv[])
 		printf("%s", spid);
 		fwrite(spid, sizeof(char), 10, f);
 		printf("[OK] : Server.\n");
-		fclose(f);
+		//fermeture du fichier pid
+		if(fclose(f) != 0){
+			perror("fclose");
+			fprintf(stderr, "Erreur : erreur lors de la fermeture du fichier\n");
+			exit(EXIT_FAILURE);
+		}
 
 		/* handler du signal SIGUSR1 */
 		void handSIGUSR1(int sig) {
@@ -61,14 +66,12 @@ int main(int argc, char const *argv[])
 				printf("signal reçu\n");
 				int fd = open("/tmp/game_server.fifo", O_RDONLY);
 				char **read = recv_argv(fd);
-				
 				close(fd);
+
 				//on stocke le pid du client, le nom du jeu ainsi que les potentiels arguments
 				pid_t cli_pid = atoi(read[0]);
-
 				char *game = read[1];
 				char *seek_game = malloc((2+strlen(game)+8)*sizeof(char));
-				strcat(seek_game, "./");
 				strcat(seek_game, game);
 				strcat(seek_game, "_serv");
 
@@ -103,12 +106,12 @@ int main(int argc, char const *argv[])
 							perror("fopen");
 							fprintf(stderr, "Erreur : ficher serveur introuvable ou acces refusé\n");
 							exit(EXIT_FAILURE);
-						}						
-
+						}		
+						printf("%d", cli_pid);
+						kill(cli_pid, SIGUSR1);	
 						//recouvrement du processus
-						execvp(seek_game, args);
+						//execvp(seek_game, args);
 					}
-
 					wait(NULL);
 				}
 				else{
@@ -119,16 +122,6 @@ int main(int argc, char const *argv[])
 
 				usr1_receive = 0;
 			}
-			else{
-				printf("%d\n", getpid());
-			}
-		}
-
-		//fermeture du fichier pid
-		if(fclose(f) != 0){
-			perror("fclose");
-			fprintf(stderr, "Erreur : erreur lors de la fermeture du fichier\n");
-			exit(EXIT_FAILURE);
 		}
 	}
 

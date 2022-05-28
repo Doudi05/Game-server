@@ -30,9 +30,7 @@ int main(int argc, char const *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-
 	char *game = malloc((2+strlen(argv[1])+5)*sizeof(char));
-	strcat(game, "./");
 	strcat(game, argv[1]);
 	strcat(game, "_cli");
 
@@ -47,51 +45,80 @@ int main(int argc, char const *argv[])
 
 
 	pid_t serv_pid = read_pid();
-	printf("%d\n", serv_pid);
 	pid_t cli_pid = getpid();
 	char *spid = malloc(6);
 	sprintf(spid, "%d", cli_pid);
 
 	char **args;
 	size_t len = 0;
-
 	for(int i = 1; i < argc; ++i){
 		len += strlen(argv[i]);
 	}
-
 	args = malloc((len+strlen(spid))*sizeof(char));
-	printf("aa\n");
 	args[0] = malloc(strlen(spid)*sizeof(char));
 	strcat(args[0], spid);
-	printf("aaa\n");
-
 	for(int i = 1; i < argc; ++i){
 		args[i] = malloc(strlen(argv[i])*sizeof(char));
 		strcat(args[i], argv[i]);
 	}
 
+	args[argc] = NULL;
+
 	
 	kill(serv_pid, SIGUSR1);
-	printf("caca\n");
 	int fd = open("/tmp/game_server.fifo", O_WRONLY);
-	printf("aaaa\n");
 	send_argv(fd, args);
-	
-
 	close(fd);
 
-	sigset_t usr1;
-	sigemptyset(&usr1);
-	sigaddset(&usr1, SIGUSR1);
-	printf("aaaaa\n");
-	while(0){
-		sigprocmask(SIG_BLOCK, &usr1, NULL);
-		if(usr1_receive){
+	/*sigset_t sig;
+	sigemptyset(&sig);
+	sigprocmask(SIG_BLOCK, &sig, NULL);
+	sigsuspend(&sig);*/
+
+	while(1){
+		if(usr1_receive == 1){
 			printf("usr1 reçu, continuité du programme");
+
+			/*char *fifo_0 = "/tmp/game_server./cli";
+			strcat(fifo_0, spid);
+			strcat(fifo_0, "_0.fifo");
+
+			char *fifo_1 = "/tmp/game_server./cli";
+			strcat(fifo_1, spid);
+			strcat(fifo_1, "_1.fifo");
+			stdout = fopen(fifo_0, "w");
+
+			if(stdout == NULL){
+				perror("fopen");
+				fprintf(stderr, "Erreur : ficher serveur introuvable ou acces refusé\n");
+				exit(EXIT_FAILURE);
+			}
+			stdin = fopen(fifo_1, "r");
+
+			if(stdin == NULL){
+				perror("fopen");
+				fprintf(stderr, "Erreur : ficher serveur introuvable ou acces refusé\n");
+				exit(EXIT_FAILURE);
+			}
+
+			char *seek_game = malloc((2+strlen(argv[1])+8)*sizeof(char));
+			strcat(seek_game, argv[1]);
+			strcat(seek_game, "_cli");
+
+			char *game_args[argc-1];
+			game_args[0] = seek_game;
+
+			for(int i = 1; i < argc-1 ; ++i){
+				game_args[i] = strcpy(game_args[i], argv[i]);
+			}
+			argv[argc-1] = NULL;
+
+			execvp(seek_game, game_args);*/
+			usr1_receive = 0;
 		}
 
-		if(usr2_receive){
-			printf("usr2 reçu, arret du programme");
+		if(usr2_receive == 1){
+			printf("arret du programme");
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -113,11 +140,6 @@ pid_t read_pid(){
 	char buf[10];
 
 	fread(buf, sizeof(int), 10, f);
-	int i = 0;
-	while(!feof(f)){
-		printf("aaaaaaa : %c", buf[i]);
-		i++;
-	}
 
 	pid = atoi(buf);
 
