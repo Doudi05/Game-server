@@ -4,7 +4,7 @@
 #include <string.h>
 
 
-#include "message.h"
+#include "message.c"
 
 // standard input (file descriptor 0) and standard output (file descriptor 1) were redirected to fifos before loading this program
 

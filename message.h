@@ -6,6 +6,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+volatile int usr1_receive = 0;
+volatile int usr2_receive = 0;
+
 char* recv_s={0};
 char** recv_a={0};
 

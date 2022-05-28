@@ -3,8 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 
-
-#include "message.h"
+#include "message.c"
 
 // file descriptors associated to the fifos
 // these values may be different in your program
